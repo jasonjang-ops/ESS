@@ -1,59 +1,643 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Physical AI Energy Systems Lab</title>
-<link rel="stylesheet" href="style.css">
-<script src="script.js"></script>
-</head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Physical AI Energy Systems Lab | Advanced Platform</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary: #38bdf8;
+            --secondary: #818cf8;
+            --accent: #10b981;
+            --bg-deep: #020617;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+            --text-main: #f1f5f9;
+            --text-dim: #94a3b8;
+            --nav-bg: rgba(2, 6, 23, 0.85);
+        }
 
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .nav-links a, .lang-btn, .tech-font {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* --- Background System --- */
+        .master-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -5;
+            background: radial-gradient(circle at 50% 50%, #0f172a 0%, #020617 100%);
+        }
+        #particleCanvas { position: absolute; top: 0; left: 0; filter: blur(0.5px); }
+        .cyber-grid {
+            position: absolute; width: 400%; height: 400%; top: -150%; left: -150%;
+            background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 80px 80px; transform: perspective(800px) rotateX(65deg);
+            animation: grid-advance 25s linear infinite;
+        }
+        @keyframes grid-advance {
+            from { transform: perspective(800px) rotateX(65deg) translateY(0); }
+            to { transform: perspective(800px) rotateX(65deg) translateY(80px); }
+        }
+        .energy-pulse {
+            position: absolute; width: 100vw; height: 100vh;
+            background: radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.08) 0%, transparent 70%);
+            animation: pulse-aura 8s infinite alternate ease-in-out;
+        }
+        @keyframes pulse-aura { 0% { opacity: 0.3; transform: scale(1); } 100% { opacity: 0.8; transform: scale(1.1); } }
+
+        /* --- Navigation --- */
+        nav {
+            position: fixed; top: 0; width: 100%; display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 40px; background: var(--nav-bg); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); z-index: 1000;
+        }
+        .logo { font-size: 1.2rem; font-weight: 800; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a { color: var(--text-dim); text-decoration: none; font-size: 0.75rem; transition: 0.3s; }
+        .nav-links a:hover { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+        .lang-switcher { display: flex; gap: 5px; background: rgba(255,255,255,0.05); padding: 4px; border-radius: 30px; border: 1px solid var(--border); }
+        .lang-btn { background: transparent; border: none; color: var(--text-dim); font-size: 0.65rem; padding: 4px 10px; border-radius: 20px; cursor: pointer; transition: 0.3s; }
+        .lang-btn.active { background: var(--primary); color: var(--bg-deep); font-weight: bold; }
+
+        /* --- Prompt Course Button --- */
+        .prompt-course-btn {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: var(--bg-deep) !important;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+            transition: 0.3s;
+            animation: pulse-border 2s infinite;
+            white-space: nowrap;
+        }
+        .prompt-course-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(56, 189, 248, 0.8);
+            color: #fff !important;
+        }
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(56, 189, 248, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+        }
+
+        /* --- Layout & Components --- */
+        .content-section { padding: 100px 5% 40px; max-width: 1400px; margin: auto; }
+        .section-title { text-align: center; margin-bottom: 50px; font-size: 2.2rem; background: linear-gradient(to right, white, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .glass-card { background: var(--glass); border: 1px solid var(--border); backdrop-filter: blur(15px); border-radius: 20px; padding: 30px; transition: 0.3s; }
+        .glass-card:hover { border-color: var(--primary); }
+        
+        /* Highlighted Focus Card */
+        .focus-card {
+            border: 1px solid var(--primary);
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.05) 0%, rgba(2, 6, 23, 0.5) 100%);
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
+        }
+        .focus-card:hover {
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
+            transform: translateY(-5px);
+        }
+
+        /* Video Container - Responsive Fix */
+        .video-container {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            position: relative;
+            border-radius: 20px;
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 30px rgba(56,189,248,0.2);
+            overflow: hidden;
+            background: #000;
+        }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+
+        /* Chart Containers */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (max-width: 768px) { .chart-container { height: 250px; } .nav-links { display: none; } } /* simplified for mobile */
+
+        /* Search Buttons */
+        .db-btn { padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; border: 1px solid var(--primary); color: var(--primary); background: transparent; transition: 0.3s; }
+        .db-btn:hover { background: var(--primary); color: var(--bg-deep); box-shadow: 0 0 15px var(--primary); }
+
+        /* Paper List */
+        .paper-item { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px; padding: 15px 20px; cursor: pointer; transition: 0.3s; margin-bottom: 15px; }
+        .paper-item:hover { border-color: var(--primary); background: rgba(56, 189, 248, 0.05); }
+        .paper-details { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; color: var(--text-dim); font-size: 0.9rem; }
+        .paper-item.active .paper-details { max-height: 300px; padding-top: 15px; border-top: 1px solid var(--border); margin-top: 10px; }
+        
+        /* Table for Admin */
+        .log-table { width: 100%; text-align: left; border-collapse: collapse; font-size: 0.9rem; }
+        .log-table th, .log-table td { padding: 12px; border-bottom: 1px solid var(--border); }
+        .log-table th { color: var(--primary); }
+    </style>
+</head>
 <body>
 
-<header>
-<h1>Physical AI Energy Systems Lab</h1>
-<p>물리적 인공지능 기반 재생에너지 시스템 연구</p>
-</header>
+    <div class="master-bg">
+        <div class="cyber-grid"></div>
+        <div class="energy-pulse"></div>
+        <canvas id="particleCanvas"></canvas>
+    </div>
 
-<nav>
-<a href="#research">Research</a>
-<a href="publications/papers.html">Publications</a>
-<a href="people/team.html">People</a>
-<a href="saemangeum/project.html">Saemangeum</a>
-<a href="#contact">Contact</a>
-</nav>
+    <nav>
+        <a href="#" class="logo">PAI ENERGY LAB</a>
+        <div class="flex items-center gap-6">
+            <div class="nav-links">
+                <a href="#home" data-i18n="nav_home">Home</a>
+                <a href="#research" data-i18n="nav_research">Research</a>
+                <a href="#saemangeum" data-i18n="nav_saemangeum">Project</a>
+                <a href="#monitoring" data-i18n="nav_monitoring">Monitoring</a>
+                <a href="#search" data-i18n="nav_search">Search</a>
+            </div>
+            
+            <!-- Prompt Engineering Course Button -->
+            <a href="https://jasonjang-ops.github.io/Prompt-Engineering-Dashboard/" target="_blank" class="prompt-course-btn tech-font hidden md:flex">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> <span data-i18n="nav_prompt_course">Prompt Course</span>
+            </a>
 
-<section id="hero">
-<h2>Future-Tech Research Platform</h2>
-<p>Physical AI • ESS Control • Renewable Smart Grid</p>
-</section>
+            <div class="lang-switcher">
+                <button class="lang-btn active" onclick="switchLang('zh')">ZH</button>
+                <button class="lang-btn" onclick="switchLang('en')">EN</button>
+                <button class="lang-btn" onclick="switchLang('ko')">KO</button>
+            </div>
+        </div>
+    </nav>
 
-<section id="research">
-<h2>Research Areas</h2>
-<ul>
-<li>Physical AI Systems</li>
-<li>Energy Storage System Control</li>
-<li>Renewable Grid Optimization</li>
-</ul>
-</section>
+    <header id="home" class="h-screen flex flex-col justify-center items-center text-center px-4">
+        <div data-aos="zoom-out" data-aos-duration="1500">
+            <h1 class="text-4xl md:text-6xl font-bold text-white mb-2 text-shadow-lg" style="text-shadow: 0 0 20px rgba(56,189,248,0.5);" data-i18n="hero_title">PHYSICAL AI</h1>
+            <h1 class="text-4xl md:text-6xl font-bold text-primary mb-6 text-shadow-lg" style="color: var(--primary); text-shadow: 0 0 20px rgba(56,189,248,0.5);">ENERGY LAB</h1>
+            <p class="text-xl md:text-2xl text-slate-300 font-light tracking-wider" data-i18n="hero_subtitle">Intelligent Control & Industry Integration</p>
+            <div class="w-32 h-1 bg-primary mx-auto my-8 shadow-[0_0_15px_#38bdf8]" style="background-color: var(--primary);"></div>
+            <p class="max-w-2xl text-slate-400 mx-auto leading-relaxed" data-i18n="hero_desc">
+                Merging thermodynamics and deep learning to pioneer next-generation Energy Storage Systems (ESS) and smart grid technologies in the Saemangeum Renewable Cluster.
+            </p>
+        </div>
+    </header>
 
-<section>
-<h2>Paper Search</h2>
-<input id="searchbox" placeholder="Search Physical AI papers">
-<button onclick="searchIEEE()">IEEE</button>
-<button onclick="searchScienceDirect()">ScienceDirect</button>
-</section>
+    <section id="research" class="content-section">
+        <h2 class="section-title" data-aos="fade-up" data-i18n="nav_research">Core Research</h2>
+        <p class="text-center text-slate-400 mb-10 max-w-3xl mx-auto" data-i18n="research_intro">Explore our cutting-edge focus areas combining Artificial Intelligence with physical constraints to solve complex energy grid challenges.</p>
+        
+        <!-- NEW: Highlighted Current Research Focus -->
+        <div class="glass-card focus-card mb-12" data-aos="fade-up">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary text-2xl">
+                    <i class="fa-solid fa-microchip"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white tech-font" data-i18n="latest_focus_title">PhD Research Focus</h3>
+            </div>
+            <p class="text-lg text-slate-300 leading-relaxed border-l-4 border-primary pl-4" data-i18n="latest_focus_desc">
+                Dedicated to the deep integration of lightweight AI and electromechanical hardware. Focused on multi-modal DAQ, edge MCU deployment (STM32/Raspberry Pi), and HIL real-time simulation to build next-gen intelligent ESS control architectures.
+            </p>
+        </div>
 
-<section id="contact">
-<h2>Contact</h2>
-<p>Email: research@physicalai-lab.org</p>
-<p>GitHub Lab Repository</p>
-</section>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="glass-card" data-aos="fade-right">
+                <h3 class="text-xl font-bold text-primary mb-3" data-i18n="card_1_title">Dir 1: Multi-sensor Lightweight AI</h3>
+                <p class="text-slate-400" data-i18n="card_1_desc">Introducing strain gauges to capture battery deformation, deploying lightweight AI on Raspberry Pi/Arduino for high-precision online SOC/SOH prediction.</p>
+            </div>
+            <div class="glass-card" data-aos="fade-up">
+                <h3 class="text-xl font-bold text-primary mb-3" data-i18n="card_2_title">Dir 2: RL-Driven Thermal Management</h3>
+                <p class="text-slate-400" data-i18n="card_2_desc">Building physical testbeds to replace PID with RL. Dynamically controlling fans/pumps via STM32/DSP for uniform temps and energy efficiency.</p>
+            </div>
+            <div class="glass-card" data-aos="fade-left">
+                <h3 class="text-xl font-bold text-primary mb-3" data-i18n="card_3_title">Dir 3: HIL Active Battery Balancing</h3>
+                <p class="text-slate-400" data-i18n="card_3_desc">Using dSPACE/OPAL-RT real-time simulators interacting with custom BMS boards for millisecond-level HIL validation of AI adaptive active balancing.</p>
+            </div>
+        </div>
 
-<footer>
-<p>© Physical AI Energy Systems Lab</p>
-</footer>
+        <!-- Interactive Paper List (Tracks Interests) -->
+        <div class="glass-card mt-10" data-aos="fade-up">
+            <h3 class="tech-font text-xl text-primary mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-book-open"></i> <span data-i18n="recent_literature">Recent Literature (2024-2026)</span>
+            </h3>
+            
+            <div class="paper-item" onclick="togglePaper(this, 'Physical AI Control')">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <div class="tech-font text-primary text-sm font-bold">2025.10</div>
+                        <div class="text-lg font-semibold mt-1" data-i18n="paper1_t">Physical AI for Adaptive Control in Large-scale ESS</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-primary transition-transform duration-300 transform group-hover:rotate-180"></i>
+                </div>
+                <div class="paper-details">
+                    <p><strong data-i18n="lbl_abstract">Abstract:</strong> <span data-i18n="paper1_a">Proposes an adaptive control architecture combining physical priors for volatile loads...</span></p>
+                </div>
+            </div>
 
+            <div class="paper-item" onclick="togglePaper(this, 'BSS Aging & PINNs')">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <div class="tech-font text-primary text-sm font-bold">2025.03</div>
+                        <div class="text-lg font-semibold mt-1" data-i18n="paper2_t">PINNs for BSS Aging Mechanism Modeling</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-primary transition-transform duration-300"></i>
+                </div>
+                <div class="paper-details">
+                    <p><strong data-i18n="lbl_abstract">Abstract:</strong> <span data-i18n="paper2_a">Explores long-term BSS aging mechanisms using PINNs for digital twin maintenance...</span></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Academic Paper Monitoring Platform -->
+    <section id="monitoring" class="content-section">
+        <h2 class="section-title" data-aos="fade-up" data-i18n="nav_monitoring">Academic Monitoring</h2>
+        <p class="text-center text-slate-400 mb-10 max-w-3xl mx-auto" data-i18n="monitor_intro">Dynamic visualization of global research trends, citation impacts, and technological distribution in Physical AI and Energy Systems.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="glass-card" data-aos="fade-right">
+                <h3 class="text-center mb-4 tech-font text-sm text-slate-300" data-i18n="chart_trend_title">Publications Trend</h3>
+                <div class="chart-container"><canvas id="trendChart"></canvas></div>
+            </div>
+            <div class="glass-card" data-aos="fade-left">
+                <h3 class="text-center mb-4 tech-font text-sm text-slate-300" data-i18n="chart_cite_title">Citation Impact</h3>
+                <div class="chart-container"><canvas id="citeChart"></canvas></div>
+            </div>
+            <div class="glass-card" data-aos="fade-right">
+                <h3 class="text-center mb-4 tech-font text-sm text-slate-300" data-i18n="chart_dir_title">Research Directions</h3>
+                <div class="chart-container"><canvas id="dirChart"></canvas></div>
+            </div>
+            <div class="glass-card" data-aos="fade-left">
+                <h3 class="text-center mb-4 tech-font text-sm text-slate-300" data-i18n="chart_dist_title">Keyword Distribution Matrix</h3>
+                <div class="chart-container"><canvas id="distChart"></canvas></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="saemangeum" class="content-section">
+        <div class="glass-card flex flex-col md:flex-row gap-10 items-center" data-aos="flip-up">
+            <div class="flex-1">
+                <h2 class="text-3xl font-bold mb-4" style="color: var(--primary);" data-i18n="section_saemangeum_title">Saemangeum Site</h2>
+                <p class="leading-loose text-slate-400" data-i18n="saemangeum_desc">
+                    As Korea's largest renewable hub, Saemangeum provides unparalleled field data. Lab collaborates with Kunsan National Univ for large-scale grid experiments.
+                </p>
+            </div>
+            <!-- Responsive Video Container -->
+            <div class="flex-1 w-full">
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/BQClBqwctAY?autoplay=1&mute=1&loop=1&playlist=BQClBqwctAY&controls=0&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="search" class="content-section text-center">
+        <div class="glass-card max-w-4xl mx-auto" data-aos="zoom-in">
+            <h2 class="text-3xl font-bold mb-4 text-white" data-i18n="section_search_title">Global Academic Search</h2>
+            <p class="text-slate-400 mb-8" data-i18n="search_intro">Select your preferred database region to access the latest literature.</p>
+            
+            <div class="flex gap-4 bg-black/20 p-2 rounded-full border border-slate-700 w-full max-w-2xl mx-auto mb-8">
+                <input type="text" id="dbSearch" class="flex-1 bg-transparent border-none text-white px-6 outline-none" data-i18n-placeholder="search_placeholder" placeholder="Keywords (e.g. 'PINN ESS')">
+            </div>
+
+            <!-- Multi-lingual DB Expansion -->
+            <div class="flex flex-col gap-6 items-center">
+                <div class="flex flex-wrap items-center gap-3 justify-center">
+                    <span class="tech-font text-slate-500 w-12 text-right">EN:</span>
+                    <button class="db-btn" onclick="execSearch('ieee')">IEEE Xplore</button>
+                    <button class="db-btn" onclick="execSearch('scienceDirect')">ScienceDirect</button>
+                </div>
+                <div class="flex flex-wrap items-center gap-3 justify-center">
+                    <span class="tech-font text-slate-500 w-12 text-right">CN:</span>
+                    <button class="db-btn" onclick="execSearch('cnki')">CNKI (知网)</button>
+                    <button class="db-btn" onclick="execSearch('wanfang')">Wanfang (万方)</button>
+                </div>
+                <div class="flex flex-wrap items-center gap-3 justify-center">
+                    <span class="tech-font text-slate-500 w-12 text-right">KO:</span>
+                    <button class="db-btn" onclick="execSearch('ieek')">IEEK (대한전자공학회)</button>
+                    <button class="db-btn" onclick="execSearch('dbpia')">DBpia</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hidden Admin Dashboard -->
+    <section id="admin-panel" class="content-section hidden">
+        <div class="glass-card border-red-500/50">
+            <div class="flex justify-between items-center mb-6 border-b border-slate-700 pb-4">
+                <h2 class="text-2xl font-bold text-red-400"><i class="fa-solid fa-lock"></i> Admin: Visitor Intelligence</h2>
+                <button onclick="closeAdmin()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-times"></i></button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-lg text-primary mb-4">Search Queries Log</h3>
+                    <div class="bg-black/30 rounded-lg max-h-64 overflow-y-auto p-4 border border-slate-700">
+                        <table class="log-table" id="searchLogTable">
+                            <tr><th>Time</th><th>Keyword</th><th>DB</th></tr>
+                            <!-- Injected by JS -->
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-lg text-primary mb-4">Paper Interest Clicks</h3>
+                    <div class="bg-black/30 rounded-lg max-h-64 overflow-y-auto p-4 border border-slate-700">
+                        <table class="log-table" id="interestLogTable">
+                            <tr><th>Time</th><th>Paper Topic</th></tr>
+                            <!-- Injected by JS -->
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8">
+                <h3 class="text-lg text-primary mb-4">Search Analytics (Keywords)</h3>
+                <div class="chart-container"><canvas id="adminChart"></canvas></div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-black/80 py-12 border-t border-slate-800 text-center mt-20 relative">
+        <p class="text-slate-400 text-sm cursor-pointer select-none" ondblclick="requestAdmin()">
+            &copy; 2026 PAI Energy Lab | <span data-i18n="location">Jeonbuk Special Self-Governing Province, Kunsan National University, New Energy Cluster Research Center</span>
+        </p>
+        <p class="text-slate-600 text-xs mt-2">Email: JasonJang@kunsan.ac.kr</p>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init();
+
+        // --- Multi-language Engine (i18n) ---
+        const i18n = {
+            zh: {
+                nav_home: "首页", nav_research: "研究", nav_saemangeum: "新万金", nav_monitoring: "学术监控", nav_search: "检索", nav_prompt_course: "提示词工程教程",
+                hero_title: "物理 AI", hero_subtitle: "智能控制与产教融合研究",
+                hero_desc: "在新万金智能能源集群中，我们将物理定律与深度学习深度融合，致力于开发下一代高效、安全的储能系统 (ESS) 控制算法与智能电网技术。",
+                latest_focus_title: "博士阶段研究核心：软硬结合的物理 AI 控制",
+                latest_focus_desc: "研究致力于将轻量化AI与机电硬件深度融合，立足于多模态数据采集（DAQ）、微控制器边缘部署（STM32/Raspberry Pi）与硬件在环（HIL）实时仿真，打造下一代储能系统智能控制架构。",
+                card_1_title: "方向一：多传感器轻量化 AI 监测", card_1_desc: "引入应变片等机械传感器捕捉电池变形，在树莓派/Arduino等边缘端部署轻量化 AI 模型，实现 SOC/SOH 在线高精度预测。",
+                card_2_title: "方向二：强化学习智能热管理", card_2_desc: "搭建物理散热台架，以强化学习替代传统 PID，在 STM32/DSP 上动态控制风扇与水泵，实现电池均温与系统极致节能。",
+                card_3_title: "方向三：HIL 退役电池主动均衡", card_3_desc: "利用 dSPACE/OPAL-RT 实时仿真机与自研 BMS 主控板交互，在真实芯片上进行毫秒级硬件在环验证，实现 AI 自适应主动均衡。",
+                research_intro: "探索结合人工智能与物理约束的前沿领域，解决复杂的能源电网挑战。",
+                recent_literature: "近期学术文献 (2024-2026)",
+                paper1_t: "物理 AI 在大型储能系统自适应控制中的应用", paper1_a: "提出了一种结合物理先验知识的自适应控制架构，专门针对波动性负载...",
+                paper2_t: "微电网 BSS 老化机制的 PINNs 建模研究", paper2_a: "利用 PINNs 模拟电化学降解过程，为产教融合实训基地提供数字孪生维护工具...",
+                lbl_abstract: "摘要：",
+                monitor_intro: "动态可视化展现物理 AI 与能源系统领域的全球研究趋势、引用影响力与技术分布。",
+                chart_trend_title: "论文发表趋势", chart_cite_title: "被引影响力对比", chart_dir_title: "研究方向分布", chart_dist_title: "关键词散点图谱",
+                section_saemangeum_title: "新万金实证基地",
+                saemangeum_desc: "作为韩国最大的可再生能源集群，新万金为我们的研究提供了无与伦比的现场数据支持。实验室与群山国立大学深度合作，参与大规模光伏并网实验。",
+                section_search_title: "全球学术检索中心", search_intro: "选择偏好的数据库区域获取最新文献。", search_placeholder: "输入关键词 (如 'PINN ESS')",
+                location: "全罗北特别自治道 群山国立大学 新能源集群研究中心"
+            },
+            en: {
+                nav_home: "Home", nav_research: "Research", nav_saemangeum: "Project", nav_monitoring: "Monitoring", nav_search: "Search", nav_prompt_course: "Prompt Course",
+                hero_title: "PHYSICAL AI", hero_subtitle: "Intelligent Control & Industry Integration",
+                hero_desc: "Merging thermodynamics and deep learning to pioneer next-generation ESS and smart grid technologies in the Saemangeum Renewable Cluster.",
+                latest_focus_title: "PhD Core Focus: Hardware-Software Integrated Physical AI",
+                latest_focus_desc: "Dedicated to the deep integration of lightweight AI and electromechanical hardware. Focused on multi-modal DAQ, edge MCU deployment (STM32/Raspberry Pi), and HIL real-time simulation to build next-gen intelligent ESS control architectures.",
+                card_1_title: "Dir 1: Multi-sensor Lightweight AI", card_1_desc: "Introducing strain gauges to capture battery deformation, deploying lightweight AI on Raspberry Pi/Arduino for high-precision online SOC/SOH prediction.",
+                card_2_title: "Dir 2: RL-Driven Thermal Management", card_2_desc: "Building physical testbeds to replace PID with RL. Dynamically controlling fans/pumps via STM32/DSP for uniform temps and energy efficiency.",
+                card_3_title: "Dir 3: HIL Active Battery Balancing", card_3_desc: "Using dSPACE/OPAL-RT real-time simulators interacting with custom BMS boards for millisecond-level HIL validation of AI adaptive active balancing.",
+                research_intro: "Explore our cutting-edge focus areas combining AI with physical constraints.",
+                recent_literature: "Recent Literature (2024-2026)",
+                paper1_t: "Physical AI for Adaptive Control in Large-scale ESS", paper1_a: "Proposes an adaptive control architecture combining physical priors for volatile loads...",
+                paper2_t: "PINNs for BSS Aging Mechanism Modeling", paper2_a: "Explores long-term BSS aging mechanisms using PINNs for digital twin maintenance...",
+                lbl_abstract: "Abstract: ",
+                monitor_intro: "Dynamic visualization of global research trends, citation impacts, and technological distribution.",
+                chart_trend_title: "Publication Trends", chart_cite_title: "Citation Impact", chart_dir_title: "Research Directions", chart_dist_title: "Keyword Scatter Map",
+                section_saemangeum_title: "Saemangeum Site",
+                saemangeum_desc: "As Korea's largest renewable hub, Saemangeum provides unparalleled field data. Lab collaborates with Kunsan National Univ for large-scale grid experiments.",
+                section_search_title: "Global Academic Search", search_intro: "Select your preferred database region.", search_placeholder: "Keywords (e.g. 'PINN ESS')",
+                location: "Jeonbuk Special Self-Governing Province, Kunsan National University, New Energy Cluster Research Center"
+            },
+            ko: {
+                nav_home: "홈", nav_research: "연구", nav_saemangeum: "프로젝트", nav_monitoring: "모니터링", nav_search: "검색", nav_prompt_course: "프롬프트 과정",
+                hero_title: "물리적 AI", hero_subtitle: "지능형 제어 및 산학융합 연구",
+                hero_desc: "새만금 스마트 에너지 클러스터에서 물리 법칙과 딥러닝을 융합하여 차세대 고효율 ESS 제어 알고리즘을 개발합니다.",
+                latest_focus_title: "박사 연구 핵심: 하드웨어-소프트웨어 통합 물리적 AI",
+                latest_focus_desc: "경량 AI와 기전 하드웨어의 깊은 융합에 전념합니다. 다중 모드 DAQ, 엣지 MCU 배포(STM32/Raspberry Pi) 및 HIL 실시간 시뮬레이션을 기반으로 차세대 지능형 ESS 제어 아키텍처를 구축합니다.",
+                card_1_title: "방향 1: 다중 센서 경량 AI 모니터링", card_1_desc: "스트레인 게이지를 도입하여 배터리 변형을 포착하고, 라즈베리파이 등 엣지에 경량 AI를 배포하여 SOC/SOH를 고정밀로 예측합니다.",
+                card_2_title: "방향 2: 강화학습 스마트 열 관리", card_2_desc: "물리적 방열 테스트베드를 구축하고 PID를 RL로 대체하여 STM32/DSP에서 팬과 펌프를 동적 제어, 균등한 온도와 에너지 절감을 달성합니다.",
+                card_3_title: "방향 3: HIL 사용 후 배터리 능동 평형", card_3_desc: "dSPACE/OPAL-RT 실시간 시뮬레이터와 자체 개발 BMS 보드를 연동하여 실제 칩에서 밀리초 단위 HIL 검증을 통한 AI 적응형 능동 평형을 실현합니다.",
+                research_intro: "AI와 물리적 제약을 결합하여 복잡한 에너지 그리드 문제를 해결하는 최첨단 연구 분야를 탐구합니다.",
+                recent_literature: "최근 연구 문헌 (2024-2026)",
+                paper1_t: "대규모 ESS 적응형 제어를 위한 물리적 AI 적용", paper1_a: "변동 부하를 위한 물리적 선험 지식 결합 적응형 제어 아키텍처 제안...",
+                paper2_t: "마이크로그리드 BSS 노화 메커니즘 PINNs 모델링", paper2_a: "디지털 트윈 유지보수를 위해 PINNs를 사용한 BSS 장기 노화 메커니즘 탐구...",
+                lbl_abstract: "초록: ",
+                monitor_intro: "물리적 AI 및 에너지 시스템의 글로벌 연구 동향, 인용 영향력, 기술 분포의 동적 시각화.",
+                chart_trend_title: "논문 발표 동향", chart_cite_title: "인용 영향력", chart_dir_title: "연구 방향 분포", chart_dist_title: "키워드 산점도",
+                section_saemangeum_title: "새만금 실증 단지",
+                saemangeum_desc: "한국 최대 재생에너지 클러스터인 새만금은 연구에 최적화된 데이터를 제공합니다. 국립군산대학교와 협력하여 대규모 계통 연계 실험을 진행합니다.",
+                section_search_title: "글로벌 학술 검색", search_intro: "선호하는 데이터베이스 지역을 선택하세요.", search_placeholder: "키워드 입력 (예: 'PINN ESS')",
+                location: "전북특별자치도 국립군산대학교 신에너지 클러스터 센터"
+            }
+        };
+
+        let currentLang = 'zh';
+        let chartsObj = {};
+
+        function switchLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase() === lang));
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                if (i18n[lang][el.getAttribute('data-i18n')]) {
+                    el.innerHTML = i18n[lang][el.getAttribute('data-i18n')];
+                }
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = i18n[lang][el.getAttribute('data-i18n-placeholder')] || el.placeholder);
+            initMonitoringCharts(); // Re-render charts for language update
+        }
+
+        // --- Paper Toggle & Visitor Tracking (Interests) ---
+        function togglePaper(element, topic) {
+            const isActive = element.classList.contains('active');
+            document.querySelectorAll('.paper-item').forEach(item => {
+                item.classList.remove('active');
+                item.querySelector('i').classList.remove('rotate-180');
+            });
+            if (!isActive) {
+                element.classList.add('active');
+                element.querySelector('i').classList.add('rotate-180');
+                logAction('interest', topic); // Log user interest
+            }
+        }
+
+        // --- Database Search & Visitor Tracking (Search) ---
+        function execSearch(dbType) {
+            const q = document.getElementById("dbSearch").value || "Physical AI ESS";
+            logAction('search', { query: q, db: dbType }); // Log search query
+
+            const urls = {
+                'ieee': `https://ieeexplore.ieee.org/search/searchresult.jsp?queryText=`,
+                'scienceDirect': `https://www.sciencedirect.com/search?qs=`,
+                'cnki': `https://kns.cnki.net/kns8s/defaultresult/index?kw=`,
+                'wanfang': `https://s.wanfangdata.com.cn/paper?q=`,
+                'ieek': `https://www.dbpia.co.kr/search/searchList?query=`,
+                'dbpia': `https://www.dbpia.co.kr/search/searchList?query=`
+            };
+            window.open(urls[dbType] + encodeURIComponent(q), "_blank");
+        }
+
+        // --- Logger Logic (Simulated Backend) ---
+        function logAction(type, data) {
+            let logs = JSON.parse(localStorage.getItem('pai_logs') || '[]');
+            logs.unshift({ time: new Date().toLocaleString(), type, data });
+            if(logs.length > 50) logs.pop(); // Keep last 50
+            localStorage.setItem('pai_logs', JSON.stringify(logs));
+        }
+
+        // --- Admin Dashboard Logic ---
+        function requestAdmin() {
+            let pwd = prompt("Admin Area. Password required:");
+            if(pwd === "admin") {
+                document.getElementById('admin-panel').classList.remove('hidden');
+                renderAdminDashboard();
+            } else if (pwd !== null) {
+                alert("Incorrect password.");
+            }
+        }
+        function closeAdmin() { document.getElementById('admin-panel').classList.add('hidden'); }
+
+        function renderAdminDashboard() {
+            const logs = JSON.parse(localStorage.getItem('pai_logs') || '[]');
+            const searchTbody = document.getElementById('searchLogTable');
+            const interestTbody = document.getElementById('interestLogTable');
+            
+            // Clear old rows except header
+            searchTbody.innerHTML = '<tr><th>Time</th><th>Keyword</th><th>DB</th></tr>';
+            interestTbody.innerHTML = '<tr><th>Time</th><th>Paper Topic</th></tr>';
+
+            let keywordCounts = {};
+
+            logs.forEach(log => {
+                if(log.type === 'search') {
+                    searchTbody.innerHTML += `<tr><td class="text-slate-400 text-xs">${log.time}</td><td>${log.data.query}</td><td class="text-primary">${log.data.db.toUpperCase()}</td></tr>`;
+                    keywordCounts[log.data.query] = (keywordCounts[log.data.query] || 0) + 1;
+                } else if(log.type === 'interest') {
+                    interestTbody.innerHTML += `<tr><td class="text-slate-400 text-xs">${log.time}</td><td class="text-accent">${log.data}</td></tr>`;
+                }
+            });
+
+            // Admin Chart
+            if(chartsObj.admin) chartsObj.admin.destroy();
+            const ctx = document.getElementById('adminChart').getContext('2d');
+            chartsObj.admin = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(keywordCounts).length ? Object.keys(keywordCounts) : ['No Data'],
+                    datasets: [{ label: 'Search Frequency', data: Object.values(keywordCounts).length ? Object.values(keywordCounts) : [0], backgroundColor: '#38bdf8' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid:{color:'#1e293b'} }, x:{grid:{display:false}} }, plugins:{legend:{display:false}} }
+            });
+        }
+
+        // --- Chart.js Academic Monitoring Platform ---
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = 'Inter';
+
+        function initMonitoringCharts() {
+            const langMap = {
+                zh: { tr: ['2022', '2023', '2024', '2025', '2026 (预计)'], trL: '论文发表量', ci: ['PINNs 控制', '电池热管理', '微电网优化', '产教政策'], ciL: '平均被引数', dr: ['强化学习', '数字孪生', '热力学建模', '硬件在环', '政策分析'], drL: '领域分布', dsx: '年份', dsy: '影响力指数' },
+                en: { tr: ['2022', '2023', '2024', '2025', '2026 (Est)'], trL: 'Publications', ci: ['PINN Control', 'Thermal Mgt', 'Microgrid', 'Policy'], ciL: 'Avg Citations', dr: ['RL', 'Digital Twin', 'Thermo Modeling', 'HIL', 'Policy'], drL: 'Focus Area', dsx: 'Year', dsy: 'Impact Score' },
+                ko: { tr: ['2022', '2023', '2024', '2025', '2026 (예상)'], trL: '논문 발표량', ci: ['PINN 제어', '열 관리', '마이크로그리드', '정책'], ciL: '평균 피인용', dr: ['강화학습', '디지털 트윈', '열역학 모델링', 'HIL', '정책 분석'], drL: '분야 분포', dsx: '연도', dsy: '영향력 지수' }
+            };
+            const d = langMap[currentLang];
+
+            // Destroy old charts
+            ['trend','cite','dir','dist'].forEach(c => { if(chartsObj[c]) chartsObj[c].destroy(); });
+
+            // 1. Line Chart (Trends)
+            chartsObj.trend = new Chart(document.getElementById('trendChart'), {
+                type: 'line',
+                data: { labels: d.tr, datasets: [{ label: d.trL, data: [12, 25, 45, 78, 110], borderColor: '#38bdf8', backgroundColor: 'rgba(56, 189, 248, 0.2)', fill: true, tension: 0.4 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid:{color:'#1e293b'} }, x:{grid:{display:false}} } }
+            });
+
+            // 2. Bar Chart (Citations)
+            chartsObj.cite = new Chart(document.getElementById('citeChart'), {
+                type: 'bar',
+                data: { labels: d.ci, datasets: [{ label: d.ciL, data: [120, 85, 210, 45], backgroundColor: ['#38bdf8', '#818cf8', '#10b981', '#f59e0b'], borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid:{color:'#1e293b'} }, x:{grid:{display:false}} } }
+            });
+
+            // 3. Radar Chart (Directions)
+            chartsObj.dir = new Chart(document.getElementById('dirChart'), {
+                type: 'radar',
+                data: { labels: d.dr, datasets: [{ label: d.drL, data: [90, 75, 85, 60, 40], backgroundColor: 'rgba(16, 185, 129, 0.3)', borderColor: '#10b981', pointBackgroundColor: '#fff' }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { r: { angleLines: { color: '#1e293b' }, grid: { color: '#1e293b' }, ticks: { display: false } } } }
+            });
+
+            // 4. Bubble Chart (Distribution)
+            chartsObj.dist = new Chart(document.getElementById('distChart'), {
+                type: 'bubble',
+                data: { datasets: [
+                    { label: 'PINNs', data: [{x: 2023, y: 50, r: 15}, {x: 2024, y: 70, r: 25}, {x: 2025, y: 90, r: 35}], backgroundColor: 'rgba(56, 189, 248, 0.6)' },
+                    { label: 'BMS', data: [{x: 2022, y: 40, r: 10}, {x: 2024, y: 60, r: 20}], backgroundColor: 'rgba(129, 140, 248, 0.6)' }
+                ]},
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { title: {display: true, text: d.dsx}, grid:{display:false}, min: 2021, max: 2026 }, y: { title: {display: true, text: d.dsy}, grid:{color:'#1e293b'} } } }
+            });
+        }
+
+        // --- Background Particle Engine ---
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25; this.speedY = Math.random() * 0.5 - 0.25;
+            }
+            update() {
+                this.x += this.speedX; this.y += this.speedY;
+                if (this.x > canvas.width) this.x = 0; else if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0; else if (this.y < 0) this.y = canvas.height;
+            }
+            draw() { ctx.fillStyle = 'rgba(56, 189, 248, 0.5)'; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
+        }
+        function initBg() { for (let i = 0; i < 100; i++) particles.push(new Particle()); }
+        function animateBg() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i; j < particles.length; j++) {
+                    let dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y, dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist < 120) { ctx.strokeStyle = `rgba(56, 189, 248, ${0.15 - dist/800})`; ctx.lineWidth = 0.5; ctx.beginPath(); ctx.moveTo(particles[i].x, particles[i].y); ctx.lineTo(particles[j].x, particles[j].y); ctx.stroke(); }
+                }
+            }
+            requestAnimationFrame(animateBg);
+        }
+
+        // --- Init ---
+        initBg(); animateBg();
+        switchLang('zh'); // Initialize charts and language
+    </script>
 </body>
 </html>
